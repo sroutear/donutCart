@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Donut shopping cart</title>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.js"></script> -->
+    <script src="./js/vue.js"></script>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <div class="title">
+        <h2>Donut Online Shop</h2>
+        <img src="images/store-line.png" alt="">
+    </div>
+    <div class="phone" id="app">
+        <!-- 導航列 -->
+        <nav>
+            <ul class="nav__tab">
+                <li :class="{ active: !isShowingCart }"
+                    @click="toggleTab(false)">商品情報</li>
+                <li :class="{ active: isShowingCart }"
+                    @click="toggleTab(true)">ショッピングカート</li>
+            </ul>
+        </nav>
+    
+        <!-- 主要展示區塊 -->
+        <main :class="{ shift: isShowingCart }">
+            <!-- 瀏覽產品 -->
+            <div class="content">
+                <!-- 範例 HTML -->
+                <div class="product" v-for="product in products">
+                    <div class="info-box">
+                        <img :src="product.thumb" />
+                        <div>
+                            <h2>{{ product.name }}</h2>
+                            <p>{{ product.price }}</p>
+                        </div>
+                    </div>
+                    <div class="action-box">
+                        <div>
+                            <button class="round" @click="minusOne(product)">-</button>
+                            <span>{{ product.amountShow }}</span>
+                            <button class="round" @click="addOne(product)">+</button>
+                        </div>
+                        <button @click="addToCart(product)">カートに入れる</button>
+                    </div>
+    
+                    <!-- 購物成功的 icon -->
+                    <div class="icon-container" :class="{ showing: product.showingIcon }">
+                        <svg class="icon" viewBox="0 0 100 100" width="80" height="80">
+                            <circle class="circle" cx="50" cy="50" r="48"></circle>
+                            <polyline class="check" points="28,53 42,66 74,34"></polyline>
+                        </svg>
+                        <p>カートに入れました</p>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- 購物清單 -->
+            <div class="content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="5">カートに入っているアイテム</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="table-title">
+                            <td>アイテム名</td>
+                            <td>数量</td>
+                            <td>価格</td>
+                            <td>小計</td>
+                            <td></td>
+                        </tr>
+                        <tr v-for="product in productsInCart">
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.amount }}</td>
+                            <td>{{ product.price }}</td>
+                            <td>{{ product.sum }}</td>
+                            <td>
+                                <button class="button-del" @click="remove(product)">×</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td></td>
+                            <td colspan="3">合計 <span class="total-price">¥ {{ total }}</span></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button class="checkout">購入する</button>
+            </div>
+        </main>
+    </div>
+    
+
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                isShowingCart: false,
+                products: [
+                    {
+                        id: "00",
+                        name: "フレンチクルーラー",
+                        price: 110,
+                        thumb:
+                            "./images/pp_dfr12001.jpg",
+                        amount: 0,
+                        amountShow: 1,
+                        showingIcon: false
+                    },
+                    {
+                        id: "01",
+                        name: "ストロベリーフレンチ",
+                        price: 140,
+                        thumb:
+                            "./images/pp_dfr12004.jpg",
+                        amount: 0,
+                        amountShow: 1,
+                        showingIcon: false
+                    },
+                    {
+                        id: "02",
+                        name: "オールドファッション",
+                        price: 110,
+                        thumb:
+                            "./images/pp_dof01.jpg",
+                        amount: 0,
+                        amountShow: 1,
+                        showingIcon: false
+                    },
+                    {
+                        id: "03",
+                        name: "ポン・デ・リング",
+                        price: 110,
+                        thumb:
+                            "./images/pp_dpd01.jpg",
+                        amount: 0,
+                        amountShow: 1,
+                        showingIcon: false
+                    },
+                    {
+                        id: "04",
+                        name: "チョコリング",
+                        price: 120,
+                        thumb:
+                            "./images/pp_drr03_1.jpg",
+                        amount: 0,
+                        amountShow: 1,
+                        showingIcon: false
+                    },
+                    {
+                        id: "05",
+                        name: "ポン・デ・ストロベリー",
+                        price: 130,
+                        thumb:
+                            "./images/pp_sberry14001.jpg",
+                        amount: 0,
+                        amountShow: 1,
+                        showingIcon: false
+                    }
+                ]
+            },
+            methods: {
+                // 切換 產品列表 / 購物車 的 tab
+                toggleTab(shouldShowCart) {
+                    this.isShowingCart = shouldShowCart;
+                },
+
+                // 點擊 - / + 後的動作
+                minusOne(product) {
+                    product.amountShow--;
+                    product.amountShow =
+                        product.amountShow < 1 ? 1 : product.amountShow;
+                },
+                addOne(product) {
+                    product.amountShow++;
+                    product.amountShow =
+                        product.amountShow > 9 ? 9 : product.amountShow;
+                },
+
+                // 點擊 add to cart 後的動作
+                addToCart(product) {
+                    product.amount += product.amountShow;
+
+                    product.showingIcon = true;
+                    setTimeout(() => {
+                        product.showingIcon = false;
+                    }, 800);
+                },
+
+                // 在購物車裡移除單一品項 ( 把數量設置成 0 )
+                remove(product) {
+                    product.amount = 0;
+                }
+            },
+            computed: {
+                // 購物車裡的品項
+                productsInCart() {
+                    return (
+                        this.products
+                            // 只顯示購買數量 > 0 的項目
+                            .filter((p) => p.amount)
+                            // 算出每個產品的小計
+                            .map((p) => {
+                                p.sum = p.amount * p.price;
+                                return p;
+                            })
+                    );
+                },
+
+                // 目前購買的總金額
+                total() {
+                    return this.productsInCart.reduce((sum, p) => sum + p.sum, 0);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
